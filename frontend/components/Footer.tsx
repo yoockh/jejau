@@ -1,6 +1,12 @@
+import { Fragment } from "react";
 import Link from "next/link";
 import { Globe, AtSign, MessageCircle, Sprout } from "lucide-react";
 import { Logo } from "@/components/Logo";
+import {
+  ALL_PHOTOS,
+  photographerUrl,
+  unsplashUrl,
+} from "@/lib/unsplash";
 
 const productLinks = [
   { href: "/#how-it-works", label: "How it works" },
@@ -95,7 +101,35 @@ export function Footer() {
           </nav>
         </div>
 
-        <div className="mt-14 flex flex-col items-center justify-between gap-4 border-t border-mint/10 pt-8 sm:flex-row">
+        {/* Unsplash photography credit, per their API guidelines */}
+        <p className="mt-14 border-t border-mint/10 pt-8 text-xs text-ivory/40">
+          Photography by{" "}
+          {ALL_PHOTOS.map((photo, i) => (
+            <Fragment key={photo.username}>
+              {i > 0 && (i === ALL_PHOTOS.length - 1 ? " and " : ", ")}
+              <a
+                href={photographerUrl(photo.username)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-ivory/60 underline-offset-2 transition-colors hover:text-mint hover:underline"
+              >
+                {photo.photographer}
+              </a>
+            </Fragment>
+          ))}{" "}
+          on{" "}
+          <a
+            href={unsplashUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-ivory/60 underline-offset-2 transition-colors hover:text-mint hover:underline"
+          >
+            Unsplash
+          </a>
+          .
+        </p>
+
+        <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-mint/10 pt-8 sm:flex-row">
           <p className="text-xs text-ivory/40">
             © {new Date().getFullYear()} Jejau. Grown with care.
           </p>

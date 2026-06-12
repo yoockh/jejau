@@ -11,11 +11,21 @@ const GlobeScene = dynamic(() => import("./GlobeScene"), {
   loading: () => <StaticGlobe />,
 });
 
+type HeroGlobeProps = {
+  /** Sizing/position classes for the globe container. */
+  className?: string;
+  /** Glow classes behind the globe (the "green sun"). */
+  glowClassName?: string;
+};
+
 /**
  * Hero globe wrapper: owns the cursor state and lazy-loads the three.js
  * scene off the critical path.
  */
-export function HeroGlobe() {
+export function HeroGlobe({
+  className = "mx-auto aspect-square w-full max-w-[36rem]",
+  glowClassName = "orb-glow absolute -inset-20",
+}: HeroGlobeProps = {}) {
   // Mutable cursor state shared with the R3F render loop — a ref, not React
   // state, since it updates on every pointer move and shouldn't re-render.
   const pointer = useRef(createPointerState());
@@ -24,7 +34,7 @@ export function HeroGlobe() {
     <div
       role="img"
       aria-label="A glowing green globe showing plants connected around the world"
-      className="relative mx-auto aspect-square w-full max-w-[36rem] cursor-grab"
+      className={`relative cursor-grab ${className}`}
       onPointerMove={(e) => {
         const rect = e.currentTarget.getBoundingClientRect();
         pointer.current.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
@@ -35,7 +45,7 @@ export function HeroGlobe() {
         pointer.current.hovering = false;
       }}
     >
-      <div className="orb-glow absolute -inset-20" aria-hidden="true" />
+      <div className={glowClassName} aria-hidden="true" />
       <GlobeScene pointer={pointer} />
     </div>
   );

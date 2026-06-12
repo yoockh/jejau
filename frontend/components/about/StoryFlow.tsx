@@ -1,7 +1,13 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import {
+  motion,
+  useReducedMotion,
+  useScroll,
+  useTransform,
+  type MotionValue,
+} from "framer-motion";
 import { Camera, FileHeart, Lightbulb } from "lucide-react";
 import { Reveal } from "@/components/ui/Reveal";
 import { SectionLabel } from "@/components/ui/Section";
@@ -56,13 +62,54 @@ const acts = [
   },
 ];
 
+/** A leaf that sprouts from a timeline node as the vine reaches it. */
+function VineLeaf({
+  progress,
+  index,
+  reduce,
+}: {
+  progress: MotionValue<number>;
+  index: number;
+  reduce: boolean;
+}) {
+  // Each act sits roughly a third down the spine; sprout just before it.
+  const start = 0.12 + index * 0.3;
+  const scale = useTransform(progress, [start, start + 0.18], [0, 1]);
+  const opacity = useTransform(progress, [start, start + 0.1], [0, 1]);
+  const dir = index % 2 === 0 ? 1 : -1;
+
+  return (
+    <svg
+      viewBox="0 0 60 40"
+      className="absolute left-6 top-5 hidden h-7 w-10 -translate-x-1/2 sm:block"
+      style={{ transform: `translateX(-50%) scaleX(${dir})` }}
+      aria-hidden="true"
+    >
+      <motion.path
+        d="M2 20 C 16 10, 40 8, 56 18 C 40 22, 18 26, 2 20 Z"
+        fill="url(#vine-leaf-grad)"
+        stroke="#2fa678"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+        style={
+          reduce
+            ? { opacity: 1 }
+            : { scale, opacity, transformBox: "fill-box", originX: 0, originY: 0.5 }
+        }
+      />
+    </svg>
+  );
+}
+
 export function StoryFlow() {
   const ref = useRef<HTMLDivElement>(null);
+  const reduce = useReducedMotion();
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start 70%", "end 70%"],
   });
   const lineScale = useTransform(scrollYProgress, [0, 1], [0, 1]);
+  const drawn = reduce ? 1 : lineScale;
 
   return (
     <section className="relative overflow-hidden bg-ivory py-24 sm:py-32">
@@ -79,20 +126,51 @@ export function StoryFlow() {
         </Reveal>
 
         <div ref={ref} className="relative mt-20">
-          {/* progress spine */}
-          <div
-            className="absolute left-6 top-0 hidden h-full w-px bg-forest/10 sm:block"
+          {/* growing vine spine — draws downward as you scroll the acts */}
+          <svg
+            className="absolute left-6 top-0 hidden h-full w-8 -translate-x-1/2 sm:block"
+            viewBox="0 0 32 1000"
+            preserveAspectRatio="none"
+            fill="none"
             aria-hidden="true"
           >
-            <motion.div
-              className="h-full w-full origin-top bg-gradient-to-b from-forest-bright to-amber"
-              style={{ scaleY: lineScale }}
+            <defs>
+              <linearGradient
+                id="vine-grad"
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="1000"
+                gradientUnits="userSpaceOnUse"
+              >
+                <stop stopColor="#2fa678" />
+                <stop offset="0.6" stopColor="#1f6f54" />
+                <stop offset="1" stopColor="#e8b23a" />
+              </linearGradient>
+              <linearGradient
+                id="vine-leaf-grad"
+                x1="0"
+                y1="0"
+                x2="1"
+                y2="0"
+              >
+                <stop stopColor="#8fe3bc" />
+                <stop offset="1" stopColor="#2fa678" />
+              </linearGradient>
+            </defs>
+            <motion.path
+              d="M16 0 C 4 150, 28 320, 16 500 C 4 680, 28 850, 16 1000"
+              stroke="url(#vine-grad)"
+              strokeWidth="3"
+              strokeLinecap="round"
+              style={{ pathLength: drawn }}
             />
-          </div>
+          </svg>
 
           <ol className="space-y-20">
             {acts.map(({ Icon, title, text, visual }, i) => (
               <li key={title} className="relative sm:pl-24">
+                <VineLeaf progress={scrollYProgress} index={i} reduce={!!reduce} />
                 <Reveal>
                   <div
                     className="absolute left-0 top-0 hidden h-12 w-12 items-center justify-center rounded-full border border-forest/20 bg-white shadow-[0_8px_24px_rgba(31,111,84,0.15)] sm:flex"
