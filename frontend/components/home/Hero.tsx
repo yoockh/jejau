@@ -152,12 +152,6 @@ export function Hero() {
         </motion.dl>
       </div>
 
-      {/* bottom fade into the next section */}
-      <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-24 bg-gradient-to-b from-transparent to-ivory"
-        aria-hidden="true"
-      />
-
       {/* scroll cue */}
       <motion.a
         href="#how-it-works"

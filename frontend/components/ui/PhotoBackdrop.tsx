@@ -73,11 +73,6 @@ export function PhotoBackdrop({
 
       {/* dark-green gradient overlay keeps text legible + colour cohesive */}
       <div className={`absolute inset-0 ${overlayClassName}`} aria-hidden="true" />
-      {/* faint living-network grid tying photos to the rest of the brand */}
-      <div
-        className="bio-grid absolute inset-0 opacity-40 mix-blend-soft-light"
-        aria-hidden="true"
-      />
 
       {credit && (
         <p className="absolute bottom-3 right-3 z-10 text-[10px] text-ivory/55">

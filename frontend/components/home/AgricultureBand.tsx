@@ -16,16 +16,6 @@ export function AgricultureBand() {
     <section className="relative flex min-h-[78vh] items-center overflow-hidden bg-charcoal-deep py-28 text-ivory sm:py-36">
       <PhotoBackdrop photo={AGRICULTURE} priority={false} />
 
-      {/* edge fades blend the photo into the light sections above and below */}
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 z-[1] h-28 bg-gradient-to-b from-ivory to-transparent"
-        aria-hidden="true"
-      />
-      <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-28 bg-gradient-to-t from-ivory-dim to-transparent"
-        aria-hidden="true"
-      />
-
       <div className="relative z-[2] mx-auto max-w-4xl px-5 text-center sm:px-8">
         <motion.p
           initial={{ opacity: 0, y: 16 }}

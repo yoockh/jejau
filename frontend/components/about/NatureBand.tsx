@@ -15,16 +15,6 @@ export function NatureBand() {
     <section className="relative flex min-h-[70vh] items-center overflow-hidden bg-charcoal-deep py-28 text-ivory sm:py-32">
       <PhotoBackdrop photo={FOREST_CANOPY} />
 
-      {/* fade from the light section above, into the dark one below */}
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 z-[1] h-28 bg-gradient-to-b from-ivory to-transparent"
-        aria-hidden="true"
-      />
-      <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-28 bg-gradient-to-t from-charcoal to-transparent"
-        aria-hidden="true"
-      />
-
       <div className="relative z-[2] mx-auto max-w-3xl px-5 text-center sm:px-8">
         <motion.blockquote
           initial={{ opacity: 0, y: 24 }}

@@ -54,11 +54,6 @@ export function IntelligenceShowcase() {
 
   return (
     <section className="relative overflow-hidden bg-charcoal-deep py-24 text-ivory sm:py-32">
-      {/* fade in from the light section above */}
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-ivory to-transparent"
-        aria-hidden="true"
-      />
       <div className="bio-grid absolute inset-0 opacity-60" aria-hidden="true" />
       <div
         className="orb-glow absolute -left-40 top-1/3 h-[32rem] w-[32rem]"

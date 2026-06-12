@@ -2,7 +2,8 @@
 
 import type { ReactNode } from "react";
 import { motion } from "framer-motion";
-import { Leaf, CheckCircle2, ScanLine } from "lucide-react";
+import { Leaf } from "lucide-react";
+import { GlassLeaf } from "@/components/plant/GlassLeaf";
 
 const ease = [0.21, 0.47, 0.32, 0.98] as const;
 
@@ -95,32 +96,14 @@ export function AuthShell({ asideTitle, asideText, children }: AuthShellProps) {
             </motion.p>
           </div>
 
-          {/* mini health-record vignette */}
+          {/* glass-polymer leaf motif — calm, premium, natural */}
           <motion.div
-            initial={{ opacity: 0, y: 28 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.35, ease }}
-            className="glass relative max-w-sm rounded-2xl p-5"
-            aria-hidden="true"
+            initial={{ opacity: 0, scale: 0.92 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1, delay: 0.35, ease }}
+            className="relative flex justify-center"
           >
-            <div className="flex items-center justify-between">
-              <p className="font-display text-sm font-bold">Basil “Pesto”</p>
-              <span className="rounded-full bg-forest-bright/15 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-mint">
-                Recovering
-              </span>
-            </div>
-            <div className="mt-4 space-y-2.5 text-xs text-ivory/65">
-              <p className="flex items-center gap-2">
-                <ScanLine className="h-3.5 w-3.5 text-amber" />
-                <span className="font-mono text-[10px] text-ivory/40">Jun 02</span>
-                Downy mildew detected · mild
-              </p>
-              <p className="flex items-center gap-2">
-                <CheckCircle2 className="h-3.5 w-3.5 text-forest-bright" />
-                <span className="font-mono text-[10px] text-ivory/40">Jun 10</span>
-                New growth healthy · airflow improved
-              </p>
-            </div>
+            <GlassLeaf className="h-[clamp(18rem,42vh,26rem)] w-auto aspect-[220/280]" />
           </motion.div>
         </aside>
 

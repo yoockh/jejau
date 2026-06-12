@@ -6,6 +6,7 @@ import * as THREE from "three";
 import type { RefObject } from "react";
 import type { PointerState } from "./pointerState";
 import { StaticGlobe } from "./StaticGlobe";
+import { isLand } from "./landMask";
 
 type PointerRef = RefObject<PointerState>;
 
@@ -42,33 +43,8 @@ function supportsWebGL(): boolean {
 const WEBGL_AVAILABLE = typeof window !== "undefined" && supportsWebGL();
 
 /* ------------------------------------------------------------------ */
-/* Geography: stylized continents as angular blobs (lat, lon, radius°) */
+/* Geography                                                           */
 /* ------------------------------------------------------------------ */
-
-const CONTINENT_BLOBS: Array<[number, number, number]> = [
-  // North America
-  [55, -100, 18], [45, -95, 14], [62, -112, 13], [40, -78, 9], [35, -106, 8],
-  [48, -122, 6], [62, -152, 7], [70, -100, 8], [25, -103, 6], [17, -91, 4],
-  [72, -41, 7], // Greenland
-  // South America
-  [-4, -61, 11], [-14, -56, 10], [-24, -61, 8], [-34, -66, 6], [4, -68, 7],
-  [-10, -76, 5], [-45, -70, 4],
-  // Africa
-  [22, 8, 11], [14, 22, 11], [4, 20, 11], [-8, 24, 9], [-20, 26, 7],
-  [-30, 24, 4], [10, -6, 8], [20, 32, 7], [2, 39, 5],
-  [-19, 47, 3], // Madagascar
-  // Europe
-  [49, 9, 7], [55, 32, 9], [45, 24, 5], [40, -4, 5], [53, -2, 3],
-  [62, 14, 6], [65, 27, 5],
-  // Asia
-  [60, 90, 16], [55, 62, 12], [65, 122, 12], [50, 102, 10], [35, 98, 9],
-  [30, 82, 7], [23, 79, 7], [46, 134, 6], [34, 114, 7], [15, 103, 5],
-  [56, 160, 5], [24, 45, 8], [33, 55, 7], [37, 138, 3],
-  // Maritime Southeast Asia + Oceania
-  [-2, 114, 4], [-7, 108, 3], [0, 101, 3], [-5, 141, 4],
-  [-25, 134, 9], [-30, 120, 6], [-19, 144, 5],
-  [-42, 172, 3], // New Zealand
-];
 
 // Hubs for the connection arcs (lat, lon) — Jejau's "living network"
 const HUBS: Array<[number, number]> = [
@@ -102,74 +78,119 @@ function latLonToVec3(lat: number, lon: number, radius = GLOBE_RADIUS) {
 }
 
 /* ------------------------------------------------------------------ */
-/* Land dots: fibonacci sphere filtered by the continent mask          */
+/* Globe dots: equal-area golden-spiral samples over the sphere, kept   */
+/* only where the Natural Earth land mask says there is land — so the   */
+/* continents are real geography, oceans stay dark and empty. Coastal   */
+/* dots run brighter so the outlines read from a distance.              */
 /* ------------------------------------------------------------------ */
 
-function useLandDots() {
+type DotLayer = { positions: Float32Array; colors: Float32Array };
+
+function makeLandDotLayer(opts: {
+  count: number;
+  seed: number;
+  keep: number;
+  brightBias: number;
+}): DotLayer {
+  const { count, seed, keep, brightBias } = opts;
+  const positions: number[] = [];
+  const colors: number[] = [];
+  const deep = new THREE.Color("#1F6F54");
+  const bright = new THREE.Color("#8FE3BC");
+  const accent = new THREE.Color("#AEF7D3");
+  const golden = Math.PI * (3 - Math.sqrt(5));
+  const rand = mulberry32(seed);
+  // rotate each layer's spiral so the lattices never align between layers
+  const lonOffset = rand() * 360;
+
+  for (let i = 0; i < count; i++) {
+    // uniform-in-y sampling → equal area per dot, expressed as lat/lon
+    const y = 1 - (i / (count - 1)) * 2;
+    const lat = THREE.MathUtils.radToDeg(
+      Math.asin(THREE.MathUtils.clamp(y, -1, 1))
+    );
+    const lon =
+      ((THREE.MathUtils.radToDeg(golden * i) + lonOffset) % 360) - 180;
+
+    // jitter off the lattice (sub-cell) so the eye can't lock onto rows
+    const jLat = lat + (rand() - 0.5) * 0.5;
+    const jLon = lon + (rand() - 0.5) * 0.5;
+
+    if (!isLand(jLat, jLon)) continue;
+    if (rand() > keep) continue;
+
+    const v = latLonToVec3(jLat, jLon, GLOBE_RADIUS * 1.002);
+    positions.push(v.x, v.y, v.z);
+
+    // dots bordering water glow brighter — crisp, readable coastlines
+    const coastal =
+      !isLand(jLat + 0.5, jLon) ||
+      !isLand(jLat - 0.5, jLon) ||
+      !isLand(jLat, jLon + 0.5) ||
+      !isLand(jLat, jLon - 0.5);
+
+    const shade = Math.min(
+      1,
+      0.22 + rand() * 0.42 + (coastal ? 0.3 : 0) + brightBias
+    );
+    const c = deep.clone().lerp(bright, shade);
+    if (rand() < 0.04) c.lerp(accent, 0.6);
+    colors.push(c.r, c.g, c.b);
+  }
+
+  return {
+    positions: new Float32Array(positions),
+    colors: new Float32Array(colors),
+  };
+}
+
+function useGlobeDots() {
   return useMemo(() => {
-    const blobDirs = CONTINENT_BLOBS.map(([lat, lon, r]) => ({
-      dir: latLonToVec3(lat, lon, 1).normalize(),
-      cos: Math.cos(THREE.MathUtils.degToRad(r)),
-    }));
-
-    const positions: number[] = [];
-    const colors: number[] = [];
-    const deep = new THREE.Color("#1F6F54");
-    const bright = new THREE.Color("#8FE3BC");
-    const tmp = new THREE.Vector3();
-    const golden = Math.PI * (3 - Math.sqrt(5));
-    const rand = mulberry32(42);
-    const N = 14000;
-
-    for (let i = 0; i < N; i++) {
-      const y = 1 - (i / (N - 1)) * 2;
-      const r = Math.sqrt(1 - y * y);
-      const t = golden * i;
-      tmp.set(Math.cos(t) * r, y, Math.sin(t) * r);
-
-      let onLand = false;
-      for (const blob of blobDirs) {
-        if (tmp.dot(blob.dir) > blob.cos) {
-          onLand = true;
-          break;
-        }
-      }
-      if (!onLand) continue;
-
-      positions.push(
-        tmp.x * GLOBE_RADIUS * 1.002,
-        tmp.y * GLOBE_RADIUS * 1.002,
-        tmp.z * GLOBE_RADIUS * 1.002
-      );
-      const c = deep.clone().lerp(bright, 0.25 + rand() * 0.75);
-      colors.push(c.r, c.g, c.b);
-    }
-
-    return {
-      positions: new Float32Array(positions),
-      colors: new Float32Array(colors),
-    };
+    // dense, fine base field covering every landmass
+    const base = makeLandDotLayer({
+      count: 42000,
+      seed: 42,
+      keep: 0.9,
+      brightBias: 0,
+    });
+    // sparser, larger, brighter sparkle layer over the same geography
+    const accent = makeLandDotLayer({
+      count: 9000,
+      seed: 1337,
+      keep: 0.5,
+      brightBias: 0.3,
+    });
+    return { base, accent };
   }, []);
 }
 
-function LandDots() {
-  const { positions, colors } = useLandDots();
+function DotField({ layer, size, opacity }: { layer: DotLayer; size: number; opacity: number }) {
   return (
     <points>
       <bufferGeometry>
-        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
-        <bufferAttribute attach="attributes-color" args={[colors, 3]} />
+        <bufferAttribute attach="attributes-position" args={[layer.positions, 3]} />
+        <bufferAttribute attach="attributes-color" args={[layer.colors, 3]} />
       </bufferGeometry>
       <pointsMaterial
-        size={0.014}
+        size={size}
         vertexColors
         transparent
-        opacity={0.95}
+        opacity={opacity}
         depthWrite={false}
         blending={THREE.AdditiveBlending}
         sizeAttenuation
       />
     </points>
+  );
+}
+
+function LandDots() {
+  const { base, accent } = useGlobeDots();
+  return (
+    <group>
+      <DotField layer={base} size={0.011} opacity={0.85} />
+      <DotField layer={accent} size={0.022} opacity={0.95} />
+    </group>
   );
 }
 
@@ -382,7 +403,8 @@ function RotatingGlobe({ pointer }: { pointer: PointerRef }) {
   });
 
   return (
-    <group ref={group} rotation={[0.18, 0, 0]}>
+    // rotation.y puts Indonesia/SE Asia front and center on first paint
+    <group ref={group} rotation={[0.18, 2.85, 0]}>
       {/* Dark planet body */}
       <mesh>
         <sphereGeometry args={[GLOBE_RADIUS * 0.985, 64, 64]} />

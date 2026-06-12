@@ -35,8 +35,9 @@ export function Footer() {
         className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-forest-bright/60 to-transparent"
         aria-hidden="true"
       />
+      {/* even, full-width wash near the seam — soft depth, no bright patch */}
       <div
-        className="orb-glow absolute -top-40 left-1/2 h-80 w-[40rem] -translate-x-1/2"
+        className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-[radial-gradient(120%_100%_at_50%_0%,rgba(31,111,84,0.16),transparent_70%)]"
         aria-hidden="true"
       />
 

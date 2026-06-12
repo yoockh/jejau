@@ -13,11 +13,17 @@ export default function HomePage() {
   return (
     <>
       <Hero />
+      <SectionSeam from={seamColor.charcoalDeep} to={seamColor.ivory} />
       <ProblemSolution />
+      <SectionSeam from={seamColor.ivory} to={seamColor.charcoalDeep} />
       <AgricultureBand />
+      <SectionSeam from={seamColor.charcoalDeep} to={seamColor.ivoryDim} />
       <HowItWorks />
+      <SectionSeam from={seamColor.ivoryDim} to={seamColor.charcoal} />
       <Features />
+      <SectionSeam from={seamColor.charcoal} to={seamColor.ivory} />
       <GrowthSection />
+      <SectionSeam from={seamColor.ivory} to={seamColor.charcoalDeep} />
       <IntelligenceShowcase />
       <FutureBand />
       <SectionSeam from={seamColor.charcoalDeep} to={seamColor.ivory} />

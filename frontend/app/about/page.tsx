@@ -20,6 +20,7 @@ export default function AboutPage() {
       <SectionSeam from={seamColor.charcoalDeep} to={seamColor.ivory} />
       <StoryFlow />
       <BotanicalDivider className="bg-ivory pb-20" />
+      <SectionSeam from={seamColor.ivory} to={seamColor.charcoalDeep} />
       <NatureBand />
       <Team />
       <SectionSeam from={seamColor.charcoal} to={seamColor.ivory} />

@@ -11,6 +11,8 @@ import {
 import { SectionLabel } from "@/components/ui/Section";
 
 const ease = [0.21, 0.47, 0.32, 0.98] as const;
+const veinGlow = "drop-shadow(0 0 1.4px rgba(174,247,211,0.95))";
+const amberGlow = "drop-shadow(0 0 2px rgba(232,178,58,0.9))";
 
 type LeafConfig = {
   sx: number;
@@ -28,12 +30,20 @@ const LEAVES: LeafConfig[] = [
   { sx: 100, sy: 110, dir: 1, range: [0.64, 0.84] },
 ];
 
-function leafPath({ sx, sy, dir }: LeafConfig) {
-  const d = dir;
-  return `M${sx} ${sy} C ${sx + d * 14} ${sy - 22}, ${sx + d * 44} ${sy - 26}, ${sx + d * 54} ${sy - 14} C ${sx + d * 44} ${sy - 2}, ${sx + d * 20} ${sy + 4}, ${sx} ${sy} Z`;
+function leafBody({ sx, sy, dir: d }: LeafConfig) {
+  return `M${sx} ${sy} C ${sx + d * 14} ${sy - 22}, ${sx + d * 44} ${sy - 26}, ${sx + d * 56} ${sy - 14} C ${sx + d * 44} ${sy - 2}, ${sx + d * 20} ${sy + 4}, ${sx} ${sy} Z`;
+}
+function leafMidrib({ sx, sy, dir: d }: LeafConfig) {
+  return `M${sx} ${sy} Q ${sx + d * 28} ${sy - 16}, ${sx + d * 52} ${sy - 13}`;
+}
+function leafSideVeins({ sx, sy, dir: d }: LeafConfig) {
+  return [
+    `M${sx + d * 18} ${sy - 9} L ${sx + d * 26} ${sy - 18}`,
+    `M${sx + d * 34} ${sy - 13} L ${sx + d * 40} ${sy - 21}`,
+  ];
 }
 
-/** A leaf that scales in from its stem attachment as scroll progress passes. */
+/** A translucent, glowing-vein leaf that scales in from its stem node. */
 function GrowLeaf({
   config,
   progress,
@@ -48,12 +58,7 @@ function GrowLeaf({
   const opacity = useTransform(progress, [start, (start + end) / 2], [0, 1]);
 
   return (
-    <motion.path
-      d={leafPath(config)}
-      fill="url(#leaf-grad)"
-      stroke="#2fa678"
-      strokeWidth="1.4"
-      strokeLinejoin="round"
+    <motion.g
       style={
         reduce
           ? { opacity: 1 }
@@ -65,7 +70,46 @@ function GrowLeaf({
               originY: 0.5,
             }
       }
-    />
+    >
+      {/* glassy translucent body */}
+      <path
+        d={leafBody(config)}
+        fill="url(#gp-glass)"
+        stroke="#8fe3bc"
+        strokeOpacity="0.55"
+        strokeWidth="1.1"
+        strokeLinejoin="round"
+      />
+      {/* circuitry veins */}
+      <g style={{ filter: veinGlow }}>
+        <path
+          d={leafMidrib(config)}
+          fill="none"
+          stroke="#aef7d3"
+          strokeWidth="0.9"
+          strokeLinecap="round"
+        />
+        {leafSideVeins(config).map((d, i) => (
+          <path
+            key={i}
+            d={d}
+            fill="none"
+            stroke="#aef7d3"
+            strokeOpacity="0.8"
+            strokeWidth="0.7"
+            strokeLinecap="round"
+          />
+        ))}
+      </g>
+      {/* amber node where the leaf joins the stem */}
+      <circle
+        cx={config.sx}
+        cy={config.sy}
+        r="2"
+        fill="#e8b23a"
+        style={{ filter: amberGlow }}
+      />
+    </motion.g>
   );
 }
 
@@ -76,50 +120,62 @@ function GrowingPlant({
   progress: MotionValue<number>;
   reduce: boolean;
 }) {
-  // Stem draws from the soil up; bud blooms at the very end.
   const budScale = useTransform(progress, [0.8, 1], [0, 1]);
 
   return (
     <svg
       viewBox="0 0 200 300"
-      className="h-[60vh] max-h-[34rem] w-auto"
+      className="h-[clamp(20rem,46vh,30rem)] w-auto overflow-visible"
       role="img"
-      aria-label="An illustration of a plant growing from a sprout into a full plant"
+      aria-label="A glowing translucent plant growing from a sprout into a full plant"
     >
       <defs>
-        <linearGradient id="leaf-grad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#8fe3bc" />
-          <stop offset="1" stopColor="#2fa678" />
+        <linearGradient id="gp-glass" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#aef7d3" stopOpacity="0.5" />
+          <stop offset="1" stopColor="#1f6f54" stopOpacity="0.22" />
         </linearGradient>
-        <linearGradient id="stem-grad" x1="0" y1="1" x2="0" y2="0">
+        <linearGradient id="gp-stem" x1="0" y1="1" x2="0" y2="0">
           <stop offset="0" stopColor="#1f6f54" />
           <stop offset="1" stopColor="#2fa678" />
         </linearGradient>
-        <radialGradient id="soil-grad" cx="0.5" cy="0.4" r="0.6">
-          <stop offset="0" stopColor="#1f6f54" stopOpacity="0.35" />
-          <stop offset="1" stopColor="#1f6f54" stopOpacity="0" />
+        <radialGradient id="gp-soil" cx="0.5" cy="0.4" r="0.6">
+          <stop offset="0" stopColor="#2fa678" stopOpacity="0.4" />
+          <stop offset="1" stopColor="#2fa678" stopOpacity="0" />
         </radialGradient>
       </defs>
 
-      {/* soft soil mound */}
-      <ellipse cx="100" cy="288" rx="74" ry="16" fill="url(#soil-grad)" />
+      {/* soft glowing soil */}
+      <ellipse cx="100" cy="288" rx="78" ry="16" fill="url(#gp-soil)" />
       <path
-        d="M44 288 Q100 274 156 288"
-        stroke="#1f6f54"
+        d="M46 288 Q100 274 154 288"
+        stroke="#2fa678"
         strokeWidth="2"
-        strokeOpacity="0.4"
+        strokeOpacity="0.5"
         fill="none"
         strokeLinecap="round"
+        style={{ filter: veinGlow }}
       />
 
-      {/* main stem */}
+      {/* main stem — structural body + luminous vein that lights up as it grows */}
       <motion.path
         d="M100 288 C 96 230, 104 170, 100 120 C 97 96, 100 84, 100 74"
-        stroke="url(#stem-grad)"
-        strokeWidth="4"
+        stroke="url(#gp-stem)"
+        strokeWidth="4.5"
+        strokeOpacity="0.5"
         strokeLinecap="round"
         fill="none"
         style={reduce ? undefined : { pathLength: progress }}
+      />
+      <motion.path
+        d="M100 288 C 96 230, 104 170, 100 120 C 97 96, 100 84, 100 74"
+        stroke="#aef7d3"
+        strokeWidth="1.3"
+        strokeLinecap="round"
+        fill="none"
+        style={{
+          filter: veinGlow,
+          ...(reduce ? {} : { pathLength: progress }),
+        }}
       />
 
       {/* leaves */}
@@ -142,12 +198,21 @@ function GrowingPlant({
         }
       >
         <path
-          d="M100 74 C 92 60, 92 48, 100 40 C 108 48, 108 60, 100 74 Z"
-          fill="url(#leaf-grad)"
-          stroke="#2fa678"
-          strokeWidth="1.4"
+          d="M100 74 C 90 58, 90 46, 100 38 C 110 46, 110 58, 100 74 Z"
+          fill="url(#gp-glass)"
+          stroke="#8fe3bc"
+          strokeOpacity="0.6"
+          strokeWidth="1.1"
         />
-        <circle cx="100" cy="44" r="3.4" fill="#aef7d3" />
+        <path
+          d="M100 72 L100 44"
+          stroke="#aef7d3"
+          strokeWidth="0.9"
+          strokeLinecap="round"
+          style={{ filter: veinGlow }}
+        />
+        <circle cx="100" cy="42" r="3.2" fill="#aef7d3" style={{ filter: veinGlow }} />
+        <circle cx="100" cy="74" r="2" fill="#e8b23a" style={{ filter: amberGlow }} />
       </motion.g>
     </svg>
   );
@@ -155,7 +220,7 @@ function GrowingPlant({
 
 /**
  * Dedicated scroll-grown plant: as the section scrolls toward centre, the
- * sprout climbs into a full plant — fully grown when the section is centred.
+ * sprout climbs into a full, bioluminescent plant — fully grown when centred.
  */
 export function GrowthSection() {
   const ref = useRef<HTMLDivElement>(null);
@@ -169,54 +234,42 @@ export function GrowthSection() {
   const fallback = useTransform(scrollYProgress, () => 1);
   const progress = reduce ? fallback : scrollYProgress;
 
-  const stageOpacity = useTransform(
-    scrollYProgress,
-    [0, 0.35, 0.7, 1],
-    [0.4, 0.7, 1, 1]
-  );
-
   return (
     <section
       ref={ref}
-      className="relative bg-ivory"
+      className="relative flex min-h-svh flex-col items-center justify-center overflow-hidden bg-ivory py-24 text-center sm:py-32"
       aria-label="A plant growing as you scroll"
     >
-      {/* fade in from the dark section above */}
       <div
-        className="pointer-events-none absolute inset-x-0 top-0 z-[1] h-24 bg-gradient-to-b from-charcoal to-transparent"
-        aria-hidden="true"
-      />
-      <div
-        className="bio-grid-light absolute inset-0 [mask-image:radial-gradient(ellipse_at_center,black,transparent_75%)]"
+        className="bio-grid-light absolute inset-0 [mask-image:radial-gradient(ellipse_at_center,black,transparent_72%)]"
         aria-hidden="true"
       />
 
-      <div className="min-h-[170vh]">
-        {/* sticky stage keeps the plant centred while it grows */}
-        <div className="sticky top-0 flex h-svh flex-col items-center justify-center px-5 text-center">
-          <motion.div
-            initial={reduce ? false : { opacity: 0, y: 20 }}
-            whileInView={reduce ? undefined : { opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7, ease }}
-          >
-            <SectionLabel>Watch it grow</SectionLabel>
-            <h2 className="mx-auto max-w-2xl font-display text-4xl font-bold tracking-tight text-charcoal sm:text-5xl">
-              A plant&apos;s whole life, captured as you go.
-            </h2>
-            <p className="mx-auto mt-4 max-w-xl leading-relaxed text-charcoal/65">
-              Scroll, and watch it grow — every photo you take adds another leaf
-              to a record that only gets richer with time.
-            </p>
-          </motion.div>
+      <div className="relative z-[2] mx-auto max-w-2xl px-5">
+        <motion.div
+          initial={reduce ? false : { opacity: 0, y: 20 }}
+          whileInView={reduce ? undefined : { opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.7, ease }}
+        >
+          <SectionLabel>Watch it grow</SectionLabel>
+          <h2 className="font-display text-4xl font-bold tracking-tight text-charcoal sm:text-5xl">
+            A plant&apos;s whole life, captured as you go.
+          </h2>
+          <p className="mx-auto mt-4 max-w-xl leading-relaxed text-charcoal/65">
+            Scroll, and watch it grow — every photo you take adds another leaf to
+            a record that only gets richer with time.
+          </p>
+        </motion.div>
+      </div>
 
-          <motion.div
-            className="mt-2 flex items-center justify-center"
-            style={reduce ? undefined : { opacity: stageOpacity }}
-          >
-            <GrowingPlant progress={progress} reduce={!!reduce} />
-          </motion.div>
-        </div>
+      {/* the plant, haloed by a soft bioluminescent bloom */}
+      <div className="relative z-[2] mt-6 flex items-center justify-center">
+        <div
+          className="absolute left-1/2 top-1/2 h-[30rem] w-[30rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(47,166,120,0.22),transparent_68%)]"
+          aria-hidden="true"
+        />
+        <GrowingPlant progress={progress} reduce={!!reduce} />
       </div>
     </section>
   );

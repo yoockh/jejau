@@ -62,7 +62,10 @@ const acts = [
   },
 ];
 
-/** A leaf that sprouts from a timeline node as the vine reaches it. */
+const vineVeinGlow = "drop-shadow(0 0 1.4px rgba(174,227,188,0.95))";
+const vineAmberGlow = "drop-shadow(0 0 2px rgba(232,178,58,0.9))";
+
+/** A translucent, glowing-vein leaf that sprouts from a timeline node. */
 function VineLeaf({
   progress,
   index,
@@ -80,23 +83,45 @@ function VineLeaf({
 
   return (
     <svg
-      viewBox="0 0 60 40"
-      className="absolute left-6 top-5 hidden h-7 w-10 -translate-x-1/2 sm:block"
+      viewBox="0 0 64 44"
+      className="absolute left-6 top-4 hidden h-9 w-12 overflow-visible sm:block"
       style={{ transform: `translateX(-50%) scaleX(${dir})` }}
       aria-hidden="true"
     >
-      <motion.path
-        d="M2 20 C 16 10, 40 8, 56 18 C 40 22, 18 26, 2 20 Z"
-        fill="url(#vine-leaf-grad)"
-        stroke="#2fa678"
-        strokeWidth="1.5"
-        strokeLinejoin="round"
+      <motion.g
         style={
           reduce
             ? { opacity: 1 }
             : { scale, opacity, transformBox: "fill-box", originX: 0, originY: 0.5 }
         }
-      />
+      >
+        {/* glassy translucent body */}
+        <path
+          d="M4 22 C 20 10, 46 8, 60 20 C 46 24, 22 30, 4 22 Z"
+          fill="url(#vine-glass)"
+          stroke="#8fe3bc"
+          strokeOpacity="0.55"
+          strokeWidth="1.2"
+          strokeLinejoin="round"
+        />
+        {/* circuitry midrib */}
+        <path
+          d="M4 22 Q 30 16, 56 19"
+          fill="none"
+          stroke="#aef7d3"
+          strokeWidth="1"
+          strokeLinecap="round"
+          style={{ filter: vineVeinGlow }}
+        />
+        {/* amber node at the stem junction */}
+        <circle
+          cx="4"
+          cy="22"
+          r="2.4"
+          fill="#e8b23a"
+          style={{ filter: vineAmberGlow }}
+        />
+      </motion.g>
     </svg>
   );
 }
@@ -147,23 +172,31 @@ export function StoryFlow() {
                 <stop offset="0.6" stopColor="#1f6f54" />
                 <stop offset="1" stopColor="#e8b23a" />
               </linearGradient>
-              <linearGradient
-                id="vine-leaf-grad"
-                x1="0"
-                y1="0"
-                x2="1"
-                y2="0"
-              >
-                <stop stopColor="#8fe3bc" />
-                <stop offset="1" stopColor="#2fa678" />
+              <linearGradient id="vine-glass" x1="0" y1="0" x2="1" y2="0">
+                <stop stopColor="#aef7d3" stopOpacity="0.5" />
+                <stop offset="1" stopColor="#1f6f54" stopOpacity="0.22" />
               </linearGradient>
             </defs>
+            {/* structural vine */}
             <motion.path
               d="M16 0 C 4 150, 28 320, 16 500 C 4 680, 28 850, 16 1000"
               stroke="url(#vine-grad)"
-              strokeWidth="3"
+              strokeWidth="3.5"
+              strokeOpacity="0.55"
               strokeLinecap="round"
               style={{ pathLength: drawn }}
+            />
+            {/* luminous circuitry overlay that lights up as it draws */}
+            <motion.path
+              d="M16 0 C 4 150, 28 320, 16 500 C 4 680, 28 850, 16 1000"
+              stroke="#aef7d3"
+              strokeWidth="1.1"
+              strokeOpacity="0.85"
+              strokeLinecap="round"
+              style={{
+                pathLength: drawn,
+                filter: "drop-shadow(0 0 1.6px rgba(174,227,188,0.9))",
+              }}
             />
           </svg>
 
