@@ -105,14 +105,20 @@ export function PricingTiers() {
           </motion.p>
         </div>
 
-        {/* Tier cards — the Pro card rises above its neighbours */}
+        {/* Tier cards — sides slide inward while Pro rises from below */}
         <div className="mt-20 grid items-stretch gap-6 lg:grid-cols-3 lg:gap-0">
           {tiers.map((tier, i) => (
-            <Reveal key={tier.name} delay={i * 0.12} className="flex">
+            <Reveal
+              key={tier.name}
+              x={i === 0 ? -52 : i === 2 ? 52 : 0}
+              y={i === 1 ? 64 : 0}
+              delay={i === 1 ? 0.2 : 0.05}
+              className="flex"
+            >
               <article
                 className={`relative flex w-full flex-col rounded-3xl p-8 transition-all duration-500 ${
                   tier.popular
-                    ? "z-10 border border-mint/50 bg-gradient-to-b from-forest-deep/80 to-charcoal-deep shadow-[0_0_70px_rgba(47,166,120,0.3)] hover:shadow-[0_0_90px_rgba(47,166,120,0.45)] lg:-my-6 lg:scale-[1.03] lg:px-9 lg:py-12"
+                    ? "animate-breathe z-10 border border-mint/50 bg-gradient-to-b from-forest-deep/80 to-charcoal-deep shadow-[0_0_70px_rgba(47,166,120,0.3)] hover:shadow-[0_0_90px_rgba(47,166,120,0.45)] lg:-my-6 lg:scale-[1.03] lg:px-9 lg:py-12"
                     : tier.comingSoon
                       ? "glass opacity-75 hover:opacity-95 lg:rounded-l-none lg:border-l-0"
                       : "glass hover:-translate-y-1 hover:border-mint/35 lg:rounded-r-none lg:border-r-0"
@@ -155,8 +161,19 @@ export function PricingTiers() {
                 </p>
 
                 <ul className="mt-8 flex-1 space-y-3.5">
-                  {tier.features.map((feature) => (
-                    <li key={feature} className="flex items-start gap-3 text-sm">
+                  {tier.features.map((feature, j) => (
+                    <motion.li
+                      key={feature}
+                      initial={{ opacity: 0, x: -14 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true, margin: "-40px" }}
+                      transition={{
+                        duration: 0.45,
+                        delay: 0.45 + j * 0.07,
+                        ease,
+                      }}
+                      className="flex items-start gap-3 text-sm"
+                    >
                       <span
                         className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${
                           tier.popular ? "bg-forest-bright/25" : "bg-mint/10"
@@ -170,7 +187,7 @@ export function PricingTiers() {
                         />
                       </span>
                       <span className="text-ivory/75">{feature}</span>
-                    </li>
+                    </motion.li>
                   ))}
                 </ul>
 

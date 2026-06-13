@@ -20,11 +20,15 @@ export function Hero() {
     target: ref,
     offset: ["start start", "end start"],
   });
-  // Gentle parallax: globe drifts up and the green glow shifts as you scroll.
+  // Gentle parallax: globe drifts up and the green glow shifts as you scroll,
+  // while the copy eases out at its own pace — layers moving at different speeds.
   const globeY = useTransform(scrollYProgress, [0, 1], ["0%", "-22%"]);
   const glowY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
+  const copyY = useTransform(scrollYProgress, [0, 0.6], ["0%", "-18%"]);
+  const copyOpacity = useTransform(scrollYProgress, [0, 0.55], [1, 0]);
   const globeStyle = reduce ? undefined : { y: globeY };
   const glowStyle = reduce ? undefined : { y: glowY };
+  const copyStyle = reduce ? undefined : { y: copyY, opacity: copyOpacity };
 
   return (
     <section
@@ -33,7 +37,7 @@ export function Hero() {
     >
       {/* base wash + a soft dark vignette that seats the globe */}
       <div
-        className="absolute inset-0 bg-[radial-gradient(ellipse_at_72%_28%,rgba(31,111,84,0.4),transparent_58%),radial-gradient(ellipse_at_8%_92%,rgba(20,80,60,0.28),transparent_52%)]"
+        className="absolute inset-0 bg-[radial-gradient(ellipse_at_78%_45%,rgba(31,111,84,0.4),transparent_58%),radial-gradient(ellipse_at_8%_92%,rgba(20,80,60,0.28),transparent_52%)]"
         aria-hidden="true"
       />
       {/* readability scrim anchored bottom-left, under the copy */}
@@ -44,7 +48,7 @@ export function Hero() {
 
       {/* living grid — masked OUT of the globe region so lines never slice it */}
       <div
-        className="bio-grid absolute inset-0 [mask-image:radial-gradient(circle_at_74%_30%,transparent_0,transparent_24%,black_58%)]"
+        className="bio-grid absolute inset-0 [mask-image:radial-gradient(circle_at_78%_46%,transparent_0,transparent_24%,black_58%)]"
         aria-hidden="true"
       />
 
@@ -55,7 +59,7 @@ export function Hero() {
         animate={reduce ? undefined : { opacity: 1, scale: 1 }}
         transition={{ duration: 1.3, delay: 0.15, ease }}
         style={globeStyle}
-        className="pointer-events-none absolute left-1/2 top-[-16%] z-[5] w-[150%] max-w-none -translate-x-[42%] sm:left-auto sm:right-[-16%] sm:top-[-12%] sm:w-[80%] sm:translate-x-0 lg:right-[-8%] lg:top-[-8%] lg:w-[62%]"
+        className="pointer-events-none absolute left-1/2 top-[-10%] z-[5] w-[140%] max-w-none -translate-x-1/2 sm:left-auto sm:right-[-14%] sm:top-[-6%] sm:w-[78%] sm:translate-x-0 lg:right-[-8%] lg:top-1/2 lg:w-[62%] lg:-translate-y-1/2"
       >
         {/* the green "sun" — unmasked so its glow bleeds across the hero */}
         <motion.div
@@ -73,8 +77,11 @@ export function Hero() {
         />
       </motion.div>
 
-      {/* CONTENT — overlaps the globe, lit from behind by its glow */}
-      <div className="relative z-20 mx-auto flex min-h-svh max-w-7xl flex-col px-5 pb-12 pt-28 sm:px-8 sm:pt-32">
+      {/* CONTENT — a measured left column, lit from behind by the globe's glow */}
+      <motion.div
+        style={copyStyle}
+        className="relative z-20 mx-auto flex min-h-svh max-w-7xl flex-col px-5 pb-12 pt-28 sm:px-8 sm:pt-32"
+      >
         <div className="flex flex-1 flex-col justify-center">
           <div className="max-w-3xl text-center lg:text-left">
             <motion.p
@@ -139,18 +146,18 @@ export function Hero() {
             ["1 photo", "to start a record"],
             ["24/7", "care guidance"],
           ].map(([value, label]) => (
-            <div key={label}>
+            <div key={label} className="group cursor-default">
               <dt className="sr-only">{label}</dt>
-              <dd className="font-display text-2xl font-bold text-mint sm:text-3xl">
+              <dd className="inline-block font-display text-2xl font-bold text-mint transition-all duration-300 group-hover:-translate-y-0.5 group-hover:[text-shadow:0_0_24px_rgba(143,227,188,0.6)] sm:text-3xl">
                 {value}
               </dd>
-              <dd className="mt-1 text-xs uppercase tracking-wider text-ivory/55">
+              <dd className="mt-1 text-xs uppercase tracking-wider text-ivory/55 transition-colors duration-300 group-hover:text-ivory/80">
                 {label}
               </dd>
             </div>
           ))}
         </motion.dl>
-      </div>
+      </motion.div>
 
       {/* scroll cue */}
       <motion.a

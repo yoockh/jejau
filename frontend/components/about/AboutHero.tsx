@@ -48,9 +48,9 @@ export function AboutHero() {
           Our mission
         </motion.p>
         <motion.h1
-          initial={{ opacity: 0, y: 28 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.1, ease }}
+          initial={{ opacity: 0, y: 28, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.9, delay: 0.1, ease }}
           className="mt-6 font-display text-4xl font-bold leading-tight tracking-tight sm:text-6xl"
         >
           Bringing plant care{" "}

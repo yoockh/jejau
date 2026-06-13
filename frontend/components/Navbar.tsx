@@ -38,24 +38,24 @@ export function Navbar() {
   return (
     <header
       className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
-        scrolled
-          ? "border-b border-mint/10 bg-charcoal-deep/80 shadow-[0_8px_32px_rgba(11,23,18,0.4)] backdrop-blur-xl"
-          : "bg-transparent"
+        scrolled ? "nav-glass" : "bg-transparent"
       }`}
     >
       <nav
         aria-label="Main"
-        className="mx-auto flex h-[4.5rem] max-w-7xl items-center justify-between px-5 sm:px-8"
+        className={`mx-auto flex max-w-7xl items-center justify-between px-5 transition-all duration-500 sm:px-8 ${
+          scrolled ? "h-[3.75rem]" : "h-[4.5rem]"
+        }`}
       >
         <Link
           href="/"
           aria-label="Jejau — home"
-          className="rounded-lg transition-transform duration-300 hover:scale-[1.03]"
+          className="rounded-lg transition-transform duration-300 hover:scale-[1.03] active:scale-95"
         >
           <Logo />
         </Link>
 
-        {/* Desktop links */}
+        {/* Desktop links — underline indicator only */}
         <ul className="hidden items-center gap-9 md:flex">
           {links.map(({ href, label }) => (
             <li key={href}>

@@ -46,13 +46,31 @@ export function Team() {
 
         <div className="mt-16 grid gap-8 sm:grid-cols-2">
           {team.map(({ name, initials, role, bio, gradient }, i) => (
-            <Reveal key={name} delay={i * 0.15}>
+            <Reveal key={name} x={i === 0 ? -48 : 48} y={0} delay={i * 0.15}>
               <article className="glass group relative overflow-hidden rounded-3xl p-8 transition-all duration-500 hover:-translate-y-2 hover:border-mint/40 hover:shadow-[0_24px_70px_rgba(47,166,120,0.25)]">
                 {/* amber accent line that grows on hover */}
                 <span
                   className="absolute left-0 top-0 h-1 w-0 bg-gradient-to-r from-amber to-forest-bright transition-all duration-500 group-hover:w-full"
                   aria-hidden="true"
                 />
+                {/* vein flourish that draws in on hover */}
+                <svg
+                  viewBox="0 0 120 120"
+                  fill="none"
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -right-2 -top-2 h-24 w-24"
+                >
+                  <path
+                    d="M118 2 C 70 6, 30 18, 14 54 C 6 74, 4 96, 2 118"
+                    stroke="#8fe3bc"
+                    strokeOpacity="0.65"
+                    strokeWidth="1.4"
+                    strokeLinecap="round"
+                    pathLength={1}
+                    className="vine-draw"
+                    style={{ filter: "drop-shadow(0 0 4px rgba(143,227,188,0.7))" }}
+                  />
+                </svg>
 
                 <div
                   className={`flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br ${gradient} font-display text-2xl font-bold text-charcoal-deep shadow-[0_8px_30px_rgba(47,166,120,0.3)] transition-transform duration-500 group-hover:scale-105 group-hover:rotate-3`}

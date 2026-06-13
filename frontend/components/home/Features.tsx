@@ -1,22 +1,77 @@
 "use client";
 
+import { useRef } from "react";
+import {
+  motion,
+  useReducedMotion,
+  useScroll,
+  useTransform,
+} from "framer-motion";
 import { ScanSearch, History, CalendarClock, CloudSun } from "lucide-react";
 import { Reveal } from "@/components/ui/Reveal";
 import { SectionLabel } from "@/components/ui/Section";
+import { LitGrid } from "@/components/ui/LitGrid";
+
+/** Corner vine that draws itself in while a card is hovered. */
+function VineCorner({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 120 120"
+      fill="none"
+      aria-hidden="true"
+      className={`pointer-events-none absolute h-24 w-24 ${className}`}
+    >
+      <path
+        d="M118 2 C 70 6, 30 18, 14 54 C 6 74, 4 96, 2 118"
+        stroke="#8fe3bc"
+        strokeOpacity="0.7"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        pathLength={1}
+        className="vine-draw"
+        style={{ filter: "drop-shadow(0 0 4px rgba(143,227,188,0.7))" }}
+      />
+      <path
+        d="M58 22 q 10 -12 24 -10 q -8 12 -24 10 Z"
+        fill="#8fe3bc"
+        fillOpacity="0"
+        stroke="#8fe3bc"
+        strokeOpacity="0.6"
+        strokeWidth="1.2"
+        pathLength={1}
+        className="vine-draw"
+      />
+    </svg>
+  );
+}
 
 export function Features() {
+  const ref = useRef<HTMLElement>(null);
+  const reduce = useReducedMotion();
+  // glow orbs counter-drift as the section scrolls — depth behind the grid
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"],
+  });
+  const orbY = useTransform(scrollYProgress, [0, 1], [-70, 70]);
+  const orbY2 = useTransform(scrollYProgress, [0, 1], [60, -60]);
+
   return (
     <section
+      ref={ref}
       id="features"
       className="relative overflow-hidden bg-charcoal py-24 text-ivory sm:py-32"
     >
-      <div className="bio-grid absolute inset-0" aria-hidden="true" />
-      <div
+      {/* grid lines illuminate along the cursor's path */}
+      <LitGrid />
+      <motion.div
         className="orb-glow absolute -right-40 top-0 h-[36rem] w-[36rem]"
+        style={reduce ? undefined : { y: orbY }}
         aria-hidden="true"
       />
-      <div
+      <motion.div
         className="orb-glow absolute -left-52 bottom-0 h-[30rem] w-[30rem]"
+        style={reduce ? undefined : { y: orbY2 }}
         aria-hidden="true"
       />
 
@@ -30,9 +85,10 @@ export function Features() {
 
         {/* Bento grid: deliberately uneven sizes */}
         <div className="mt-16 grid gap-5 md:grid-cols-6 lg:grid-rows-[auto_auto]">
-          {/* Disease detection — the big one */}
-          <Reveal className="md:col-span-4">
+          {/* Disease detection — the big one, sliding in from the left */}
+          <Reveal x={-48} y={0} className="md:col-span-4">
             <article className="glass group relative h-full overflow-hidden rounded-3xl p-8 transition-all duration-500 hover:-translate-y-1 hover:border-mint/40 hover:shadow-[0_0_60px_rgba(47,166,120,0.2)] sm:p-10">
+              <VineCorner className="right-2 top-2 rotate-0" />
               <div
                 className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-forest-bright/10 blur-3xl transition-opacity duration-500 group-hover:opacity-150"
                 aria-hidden="true"
@@ -64,9 +120,10 @@ export function Features() {
             </article>
           </Reveal>
 
-          {/* Health timeline — tall accent card */}
-          <Reveal delay={0.12} className="md:col-span-2 md:row-span-2">
+          {/* Health timeline — tall accent card, sliding in from the right */}
+          <Reveal x={48} y={0} delay={0.12} className="md:col-span-2 md:row-span-2">
             <article className="group relative h-full overflow-hidden rounded-3xl border border-forest-bright/25 bg-gradient-to-b from-forest-deep/60 to-charcoal-deep p-8 transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_0_60px_rgba(47,166,120,0.25)]">
+              <VineCorner className="right-2 top-2" />
               <History className="h-10 w-10 text-mint" aria-hidden="true" />
               <h3 className="mt-6 font-display text-2xl font-bold">
                 Health timeline

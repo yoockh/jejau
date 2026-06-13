@@ -5,6 +5,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { Camera, BrainCircuit, History } from "lucide-react";
 import { Reveal } from "@/components/ui/Reveal";
 import { SectionLabel } from "@/components/ui/Section";
+import { WordCascade } from "@/components/ui/TextReveal";
 
 const steps = [
   {
@@ -41,12 +42,17 @@ export function HowItWorks() {
       className="relative overflow-hidden bg-ivory-dim py-24 sm:py-32"
     >
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
-        <Reveal className="max-w-2xl">
-          <SectionLabel>How it works</SectionLabel>
+        <div className="max-w-2xl">
+          <Reveal>
+            <SectionLabel>How it works</SectionLabel>
+          </Reveal>
           <h2 className="font-display text-4xl font-bold tracking-tight text-charcoal sm:text-5xl">
-            From photo to foresight, in three steps.
+            <WordCascade
+              text="From photo to foresight, in three steps."
+              delay={0.1}
+            />
           </h2>
-        </Reveal>
+        </div>
 
         <div ref={ref} className="relative mt-20">
           {/* Connecting path — drawn as you scroll (desktop) */}
@@ -88,9 +94,20 @@ export function HowItWorks() {
               >
                 <li className="group relative pl-20 lg:pl-0">
                   <div className="absolute left-0 top-0 lg:relative lg:mb-6">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-forest/20 bg-white shadow-[0_8px_30px_rgba(31,111,84,0.15)] transition-all duration-300 group-hover:-translate-y-1 group-hover:border-forest-bright/50 group-hover:shadow-[0_12px_40px_rgba(47,166,120,0.3)]">
+                    <motion.div
+                      initial={{ scale: 0, rotate: -8 }}
+                      whileInView={{ scale: 1, rotate: 0 }}
+                      viewport={{ once: true, margin: "-80px" }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 260,
+                        damping: 18,
+                        delay: 0.25 + i * 0.18,
+                      }}
+                      className="flex h-14 w-14 items-center justify-center rounded-2xl border border-forest/20 bg-white shadow-[0_8px_30px_rgba(31,111,84,0.15)] transition-all duration-300 group-hover:-translate-y-1 group-hover:rotate-3 group-hover:border-forest-bright/50 group-hover:shadow-[0_12px_40px_rgba(47,166,120,0.3)]"
+                    >
                       <Icon className="h-6 w-6 text-forest" aria-hidden="true" />
-                    </div>
+                    </motion.div>
                   </div>
                   <p
                     className="font-display text-sm font-bold tracking-[0.3em] text-forest/50"

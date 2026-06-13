@@ -74,7 +74,7 @@ export function Footer() {
                 <li key={label}>
                   <Link
                     href={href}
-                    className="text-sm text-ivory/60 transition-colors hover:text-mint"
+                    className="inline-block text-sm text-ivory/60 transition-all duration-300 hover:translate-x-1 hover:text-mint"
                   >
                     {label}
                   </Link>
@@ -92,7 +92,7 @@ export function Footer() {
                 <li key={label}>
                   <Link
                     href={href}
-                    className="text-sm text-ivory/60 transition-colors hover:text-mint"
+                    className="inline-block text-sm text-ivory/60 transition-all duration-300 hover:translate-x-1 hover:text-mint"
                   >
                     {label}
                   </Link>

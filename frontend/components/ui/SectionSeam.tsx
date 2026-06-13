@@ -1,12 +1,12 @@
 /**
- * A soft vertical gradient band placed between two sections so the colour
- * transitions instead of jumping. `from`/`to` are CSS colours that should
- * match the previous section's bottom and the next section's top.
+ * Seam between two sections: a clean, straight, precise vertical gradient
+ * running EXACTLY from the previous section's colour to the next one's.
+ * No curves, no translucent layers, no blur — those read as grey haze.
  */
 export function SectionSeam({
   from,
   to,
-  className = "h-20 sm:h-28",
+  className = "h-16 sm:h-24",
 }: {
   from: string;
   to: string;

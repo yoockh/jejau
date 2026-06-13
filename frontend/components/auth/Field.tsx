@@ -57,7 +57,7 @@ export function Field({
           placeholder=" "
           aria-invalid={!!error}
           aria-describedby={error ? `${id}-error` : undefined}
-          className={`peer w-full rounded-xl border bg-charcoal-deep/60 px-4 pb-2.5 pt-6 text-ivory transition-colors duration-300 placeholder:text-transparent focus:outline-none ${borderClasses} ${
+          className={`peer w-full rounded-xl border bg-charcoal-deep/60 px-4 pb-2.5 pt-6 text-ivory transition-all duration-300 placeholder:text-transparent focus:shadow-[0_0_0_1px_rgba(143,227,188,0.22),0_0_26px_rgba(47,166,120,0.16)] focus:outline-none ${borderClasses} ${
             isPassword ? "pr-12" : success ? "pr-11" : ""
           }`}
         />

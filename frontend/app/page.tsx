@@ -8,6 +8,7 @@ import { IntelligenceShowcase } from "@/components/home/IntelligenceShowcase";
 import { FutureBand } from "@/components/home/FutureBand";
 import { FinalCta } from "@/components/home/FinalCta";
 import { SectionSeam, seamColor } from "@/components/ui/SectionSeam";
+import { StackPair } from "@/components/ui/StackPair";
 
 export default function HomePage() {
   return (
@@ -24,8 +25,8 @@ export default function HomePage() {
       <SectionSeam from={seamColor.charcoal} to={seamColor.ivory} />
       <GrowthSection />
       <SectionSeam from={seamColor.ivory} to={seamColor.charcoalDeep} />
-      <IntelligenceShowcase />
-      <FutureBand />
+      {/* the showcase pins and recedes while the future band stacks over it */}
+      <StackPair back={<IntelligenceShowcase />} front={<FutureBand />} />
       <SectionSeam from={seamColor.charcoalDeep} to={seamColor.ivory} />
       <FinalCta />
     </>

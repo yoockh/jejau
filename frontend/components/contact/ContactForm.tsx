@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, type FormEvent, type ReactNode } from "react";
 import { Send, Loader2, CheckCircle2, AlertTriangle, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 
@@ -13,7 +13,21 @@ const FORMSPREE_FORM_ID = "YOUR_FORMSPREE_FORM_ID";
 type Status = "idle" | "sending" | "sent" | "error";
 
 const fieldClasses =
-  "w-full rounded-xl border border-mint/20 bg-charcoal-deep/60 px-4 py-3 text-ivory placeholder:text-ivory/35 transition-colors duration-300 focus:border-mint/60 focus:outline-none";
+  "w-full rounded-xl border border-mint/20 bg-charcoal-deep/60 px-4 py-3 text-ivory placeholder:text-ivory/35 transition-all duration-300 focus:border-mint/60 focus:shadow-[0_0_0_1px_rgba(143,227,188,0.25),0_0_28px_rgba(47,166,120,0.18)] focus:outline-none";
+
+/** Wraps a field with a luminous underline that grows while it's focused. */
+function FieldGlow({ children }: { children: ReactNode }) {
+  return (
+    <div className="relative [&:focus-within>span]:scale-x-100">
+      {children}
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute -bottom-px left-4 right-4 h-px origin-left scale-x-0 bg-gradient-to-r from-mint via-forest-bright to-transparent transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
+        style={{ boxShadow: "0 0 12px rgba(143,227,188,0.6)" }}
+      />
+    </div>
+  );
+}
 
 export function ContactForm() {
   const [status, setStatus] = useState<Status>("idle");
@@ -68,15 +82,17 @@ export function ContactForm() {
           >
             Name
           </label>
-          <input
-            id="contact-name"
-            name="name"
-            type="text"
-            required
-            autoComplete="name"
-            placeholder="Your name"
-            className={fieldClasses}
-          />
+          <FieldGlow>
+            <input
+              id="contact-name"
+              name="name"
+              type="text"
+              required
+              autoComplete="name"
+              placeholder="Your name"
+              className={fieldClasses}
+            />
+          </FieldGlow>
         </div>
         <div className="flex flex-col gap-2">
           <label
@@ -85,15 +101,17 @@ export function ContactForm() {
           >
             Email
           </label>
-          <input
-            id="contact-email"
-            name="email"
-            type="email"
-            required
-            autoComplete="email"
-            placeholder="you@example.com"
-            className={fieldClasses}
-          />
+          <FieldGlow>
+            <input
+              id="contact-email"
+              name="email"
+              type="email"
+              required
+              autoComplete="email"
+              placeholder="you@example.com"
+              className={fieldClasses}
+            />
+          </FieldGlow>
         </div>
       </div>
 
@@ -104,14 +122,16 @@ export function ContactForm() {
         >
           Message
         </label>
-        <textarea
-          id="contact-message"
-          name="message"
-          required
-          rows={6}
-          placeholder="Tell us about your plants, your farm, or your idea…"
-          className={`${fieldClasses} resize-y`}
-        />
+        <FieldGlow>
+          <textarea
+            id="contact-message"
+            name="message"
+            required
+            rows={6}
+            placeholder="Tell us about your plants, your farm, or your idea…"
+            className={`${fieldClasses} resize-y`}
+          />
+        </FieldGlow>
       </div>
 
       {/*

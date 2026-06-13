@@ -1,8 +1,14 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useRef } from "react";
+import {
+  motion,
+  useReducedMotion,
+  useScroll,
+  useTransform,
+} from "framer-motion";
 import { ScanLine, XCircle, CheckCircle2, TrendingUp } from "lucide-react";
-import { Reveal, staggerParent, staggerChild } from "@/components/ui/Reveal";
+import { Reveal, staggerChild } from "@/components/ui/Reveal";
 import { SectionLabel } from "@/components/ui/Section";
 
 const recordEntries = [
@@ -49,35 +55,51 @@ const statusIcon = {
 };
 
 export function ProblemSolution() {
+  const ref = useRef<HTMLElement>(null);
+  const reduce = useReducedMotion();
+  // the record card drifts at its own pace — layered parallax against the copy
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"],
+  });
+  const cardY = useTransform(scrollYProgress, [0, 1], [48, -48]);
+
   return (
-    <section className="relative overflow-hidden bg-ivory py-24 sm:py-32">
+    <section
+      ref={ref}
+      className="relative overflow-hidden bg-ivory py-24 sm:py-32"
+    >
       <div className="bio-grid-light absolute inset-0 [mask-image:radial-gradient(ellipse_at_left,black,transparent_70%)]" />
 
       <div className="relative mx-auto grid max-w-7xl items-center gap-16 px-5 sm:px-8 lg:grid-cols-[1fr_1.1fr]">
-        {/* The problem — oversized statement, asymmetric left column */}
+        {/* The problem — slides in from the left as the section enters */}
         <div>
-          <Reveal>
+          <Reveal x={-44} y={0}>
             <SectionLabel>The problem</SectionLabel>
             <h2 className="font-display text-4xl font-bold leading-tight tracking-tight text-charcoal sm:text-5xl">
               Most plant apps{" "}
               <span className="relative inline-block text-charcoal/40">
                 scan once
-                <span
-                  className="absolute left-0 top-1/2 h-[3px] w-full -rotate-2 rounded bg-amber"
+                <motion.span
+                  className="absolute left-0 top-1/2 h-[3px] w-full origin-left -rotate-2 rounded bg-amber"
                   aria-hidden="true"
+                  initial={{ scaleX: 0 }}
+                  whileInView={{ scaleX: 1 }}
+                  viewport={{ once: true, margin: "-80px" }}
+                  transition={{ duration: 0.5, delay: 0.7, ease: "easeOut" }}
                 />
               </span>{" "}
               and forget.
             </h2>
           </Reveal>
-          <Reveal delay={0.15}>
+          <Reveal x={-44} y={0} delay={0.15}>
             <p className="mt-6 max-w-md text-lg leading-relaxed text-charcoal/70">
               A diagnosis without history is a guess. Diseases develop over
               weeks, treatments take time to work, and seasons change what your
               plant needs. One snapshot can&apos;t see any of that.
             </p>
           </Reveal>
-          <Reveal delay={0.3}>
+          <Reveal x={-44} y={0} delay={0.3}>
             <p className="mt-6 max-w-md text-lg font-medium leading-relaxed text-forest">
               Jejau keeps the whole story — every photo becomes an entry in a
               living health record, so each diagnosis learns from the last.
@@ -85,12 +107,27 @@ export function ProblemSolution() {
           </Reveal>
         </div>
 
-        {/* The solution — a mock health record, offset and staggered */}
+        {/* The solution — the record drifts in from the right, straightening
+            as it lands, then its entries cascade */}
         <motion.div
-          variants={staggerParent}
+          variants={{
+            hidden: { opacity: 0, x: 56, rotate: 2 },
+            show: {
+              opacity: 1,
+              x: 0,
+              rotate: 0,
+              transition: {
+                duration: 0.9,
+                ease: [0.21, 0.47, 0.32, 0.98],
+                staggerChildren: 0.12,
+                delayChildren: 0.3,
+              },
+            },
+          }}
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: "-80px" }}
+          style={reduce ? undefined : { y: cardY }}
           className="relative"
           aria-label="Example plant health record"
         >
@@ -118,7 +155,7 @@ export function ProblemSolution() {
                 <motion.li
                   key={entry.date}
                   variants={staggerChild}
-                  className={`flex items-start gap-4 rounded-xl border-l-4 p-4 transition-transform duration-300 hover:translate-x-1 ${statusStyles[entry.status]} ${
+                  className={`flex items-start gap-4 rounded-xl border-l-4 p-4 transition-all duration-300 hover:translate-x-1.5 hover:shadow-[0_8px_28px_rgba(31,111,84,0.14)] ${statusStyles[entry.status]} ${
                     i % 2 === 1 ? "sm:ml-8" : ""
                   }`}
                 >

@@ -1,5 +1,6 @@
 "use client";
 
+import { motion, useReducedMotion } from "framer-motion";
 import { Recycle, Accessibility, Crosshair } from "lucide-react";
 import { Reveal } from "@/components/ui/Reveal";
 import { SectionLabel } from "@/components/ui/Section";
@@ -23,6 +24,7 @@ const values = [
 ];
 
 export function Values() {
+  const reduce = useReducedMotion();
   return (
     <section className="relative bg-ivory py-24 sm:py-32">
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
@@ -40,7 +42,19 @@ export function Values() {
 
           <div className="grid gap-5 sm:grid-cols-3">
             {values.map(({ Icon, title, text }, i) => (
-              <Reveal key={title} delay={i * 0.12} className={i === 1 ? "sm:mt-10" : ""}>
+              <motion.div
+                key={title}
+                className={i === 1 ? "sm:mt-10" : ""}
+                initial={reduce ? false : { opacity: 0, y: 36, scale: 0.9 }}
+                whileInView={reduce ? undefined : { opacity: 1, y: 0, scale: 1 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={{
+                  type: "spring",
+                  stiffness: 200,
+                  damping: 22,
+                  delay: 0.1 + i * 0.14,
+                }}
+              >
                 <article className="group h-full rounded-3xl border border-forest/10 bg-white p-7 shadow-[0_12px_40px_rgba(19,36,29,0.06)] transition-all duration-500 hover:-translate-y-1.5 hover:border-forest/30 hover:shadow-[0_20px_60px_rgba(31,111,84,0.15)]">
                   <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-forest/10 transition-colors duration-300 group-hover:bg-forest group-hover:[&>svg]:text-ivory">
                     <Icon
@@ -55,7 +69,7 @@ export function Values() {
                     {text}
                   </p>
                 </article>
-              </Reveal>
+              </motion.div>
             ))}
           </div>
         </div>

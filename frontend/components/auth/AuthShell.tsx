@@ -103,7 +103,7 @@ export function AuthShell({ asideTitle, asideText, children }: AuthShellProps) {
             transition={{ duration: 1, delay: 0.35, ease }}
             className="relative flex justify-center"
           >
-            <GlassLeaf className="h-[clamp(18rem,42vh,26rem)] w-auto aspect-[220/280]" />
+            <GlassLeaf className="h-[clamp(18rem,44vh,27rem)] w-auto aspect-[240/330]" />
           </motion.div>
         </aside>
 
